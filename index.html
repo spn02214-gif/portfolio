@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scalable Order Risk & Decision Intelligence System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0f14;
+  --paper: #f7f5f0;
+  --paper2: #efece5;
+  --cream: #e8e3d8;
+  --accent: #1a3a5c;
+  --accent2: #c4602a;
+  --accent3: #2a7a4a;
+  --muted: #7a7568;
+  --border: #d6d0c4;
+  --radius: 4px;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.page { max-width: 880px; margin: 0 auto; padding: 0 28px 120px; }
+
+/* ── Masthead ────────────────────────────────────────────── */
+.masthead {
+  border-bottom: 2px solid var(--ink);
+  padding: 32px 0 20px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 72px;
+}
+.masthead-name {
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+.masthead-nav { display: flex; gap: 20px; }
+.masthead-nav a {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.masthead-nav a:hover { color: var(--ink); }
+
+/* ── Hero ────────────────────────────────────────────────── */
+.hero { margin-bottom: 80px; }
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--accent2); }
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(38px, 6vw, 62px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 24px;
+  max-width: 720px;
+}
+.hero h1 em { font-style: italic; color: var(--accent2); }
+.hero-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-bottom: 32px;
+}
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hero-meta-item .label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hero-meta-item .value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
+.chip {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--muted);
+  background: var(--paper);
+}
+.chip.blue  { border-color: #1a3a5c; color: #1a3a5c; background: rgba(26,58,92,0.06); }
+.chip.rust  { border-color: #c4602a; color: #c4602a; background: rgba(196,96,42,0.06); }
+.chip.green { border-color: #2a7a4a; color: #2a7a4a; background: rgba(42,122,74,0.06); }
+
+/* ── Section ─────────────────────────────────────────────── */
+.section { margin-bottom: 72px; }
+.section-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.section-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent2);
+  letter-spacing: 0.04em;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.2;
+}
+.section-title::after { content: ''; display: block; width: 100%; height: 1px; background: var(--border); margin-top: 10px; }
+
+/* ── Problem cards ───────────────────────────────────────── */
+.problem-grid { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.problem-card {
+  background: var(--paper);
+  padding: 24px 26px;
+  position: relative;
+}
+.problem-card:hover { background: var(--paper2); }
+.problem-card .p-tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 10px;
+}
+.problem-card .p-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.problem-card .p-body { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+
+/* ── Decision table ──────────────────────────────────────── */
+.decision-table { width: 100%; border-collapse: collapse; }
+.decision-table thead th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper2);
+}
+.decision-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+  vertical-align: top;
+}
+.decision-table tbody tr:last-child td { border-bottom: none; }
+.decision-table tbody tr:hover td { background: var(--paper2); }
+.decision-table td.decision-col { font-weight: 500; color: var(--ink); }
+.decision-table td.why-col { color: var(--muted); }
+.decision-table td.tradeoff-col {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--accent2);
+}
+
+/* ── Architecture ────────────────────────────────────────── */
+.arch-pipeline {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  margin-bottom: 20px;
+}
+.pipeline-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.pipeline-row:last-child { margin-bottom: 0; }
+.pipe-node {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-family: var(--mono);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pipe-node.accent { border-color: var(--accent); color: var(--accent); background: rgba(26,58,92,0.05); }
+.pipe-node.rust   { border-color: var(--accent2); color: var(--accent2); background: rgba(196,96,42,0.05); }
+.pipe-node.green  { border-color: var(--accent3); color: var(--accent3); background: rgba(42,122,74,0.05); }
+.pipe-arrow { color: var(--muted); font-size: 16px; flex-shrink: 0; }
+.pipe-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.arch-note {
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-left: 2px solid var(--accent2);
+  background: rgba(196,96,42,0.04);
+  margin-top: 16px;
+}
+
+/* ── Feature status ──────────────────────────────────────── */
+.feat-grid { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.feat-row {
+  background: var(--paper);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 16px;
+  padding: 16px 20px;
+}
+.feat-row:hover { background: var(--paper2); }
+.feat-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+.feat-note { font-size: 12.5px; color: var(--muted); }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pill-done  { background: rgba(42,122,74,0.1);  color: var(--accent3); border: 1px solid rgba(42,122,74,0.3); }
+.pill-debug { background: rgba(196,96,42,0.1); color: var(--accent2); border: 1px solid rgba(196,96,42,0.3); }
+.pill-next  { background: rgba(26,58,92,0.1);  color: var(--accent);  border: 1px solid rgba(26,58,92,0.3);  }
+
+/* ── Highlight boxes ─────────────────────────────────────── */
+.highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .highlight-grid { grid-template-columns: 1fr; } }
+.highlight-box {
+  border: 1px solid var(--border);
+  padding: 22px 22px;
+  position: relative;
+}
+.highlight-box .hb-num {
+  font-family: var(--mono);
+  font-size: 48px;
+  font-weight: 500;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.highlight-box .hb-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.highlight-box .hb-body  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.highlight-box .hb-tag {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent2);
+}
+
+/* ── Metrics band ────────────────────────────────────────── */
+.metrics-band {
+  background: var(--ink);
+  color: white;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: 40px 0;
+}
+@media (max-width: 600px) { .metrics-band { grid-template-columns: 1fr 1fr; } }
+.metric {
+  padding: 24px 20px;
+  background: var(--ink);
+}
+.metric .m-val {
+  font-family: var(--serif);
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 4px;
+  color: white;
+}
+.metric .m-val em { color: var(--accent2); font-style: normal; }
+.metric .m-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; }
+
+/* ── Roadmap ─────────────────────────────────────────────── */
+.roadmap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .roadmap { grid-template-columns: 1fr; } }
+.roadmap-col {
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+.roadmap-col .phase {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.phase-done  { color: var(--accent3); }
+.phase-next  { color: var(--accent); }
+.phase-later { color: var(--muted); }
+.roadmap-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.roadmap-col li { font-size: 13px; color: var(--muted); display: flex; align-items: flex-start; gap: 8px; }
+.roadmap-col li::before { content: '—'; color: var(--border); flex-shrink: 0; }
+.roadmap-col li.done { color: var(--ink); }
+.roadmap-col li.done::before { content: '✓'; color: var(--accent3); }
+
+/* ── Call to action ──────────────────────────────────────── */
+.cta-block {
+  background: var(--ink);
+  color: white;
+  padding: 48px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 56px;
+}
+.cta-block .cta-text { font-family: var(--serif); font-size: 22px; line-height: 1.3; max-width: 420px; }
+.cta-block .cta-text em { color: var(--accent2); font-style: italic; }
+.cta-links { display: flex; gap: 14px; flex-wrap: wrap; }
+.cta-link {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cta-link:hover { border-color: white; background: rgba(255,255,255,0.06); }
+.cta-link.primary { background: var(--accent2); border-color: var(--accent2); }
+.cta-link.primary:hover { background: #b5501f; border-color: #b5501f; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+  margin-top: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-left { font-family: var(--serif); font-size: 14px; }
+.footer-right { font-size: 12px; color: var(--muted); }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .section-header { grid-template-columns: 1fr; }
+  .metrics-band { grid-template-columns: 1fr 1fr; }
+  .cta-block { padding: 32px 24px; }
+}
+
+/* ── Fade-in animation ───────────────────────────────────── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeUp 0.6s ease forwards;
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: none; }
+}
+.fade-in:nth-child(1) { animation-delay: 0.05s; }
+.fade-in:nth-child(2) { animation-delay: 0.12s; }
+.fade-in:nth-child(3) { animation-delay: 0.19s; }
+.fade-in:nth-child(4) { animation-delay: 0.26s; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-name">Heejin Kim · Portfolio</div>
+  <nav class="masthead-nav">
+    <a href="#problem">Problem</a>
+    <a href="#decisions">Decisions</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#features">Features</a>
+    <a href="#roadmap">Roadmap</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Case Study · B2B SaaS MVP</div>
+  <h1>Scalable Order Risk &<br>Decision Intelligence<br><em>System</em></h1>
+  <div style="display:inline-block;background:rgba(196,96,42,0.08);border:1px solid rgba(196,96,42,0.25);border-radius:4px;padding:12px 18px;margin-bottom:28px;max-width:640px;">
+    <p style="font-size:15px;color:var(--ink);line-height:1.65;font-style:italic;">
+      "엑셀 기반 주문 데이터에서<br>
+      즉시 대응이 필요한 리스크를 자동 식별하고<br>
+      대응 우선순위를 제시하는 시스템"
+    </p>
+  </div>
+  <p class="hero-desc">
+    현장 인터뷰를 통해 ERP와 실제 운영 사이의 간극을 정의하고,
+    실제 주문 데이터를 기반으로 즉시 대응이 필요한 리스크를 식별하는 경량 실행 레이어를 설계했습니다.
+    <br><br>
+    기존 시스템을 대체하지 않고,
+    다양한 order-based workflows 위에서 작동하는 구조를 통해
+    운영 의사결정을 "조회"에서 "판단"으로 전환하는 것을 목표로 합니다.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="label">Role</span>
+      <span class="value">Product Manager (Solo)</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">Stage</span>
+      <span class="value">Working MVP · Phase 1 Complete</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">Period</span>
+      <span class="value">2026. 01 — 04</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">Target Market</span>
+      <span class="value">Order-Based Operations · SMB</span>
+    </div>
+  </div>
+  <div class="chip-row">
+    <span class="chip blue">FastAPI</span>
+    <span class="chip blue">MySQL</span>
+    <span class="chip blue">Gemini API</span>
+    <span class="chip green">Single-file SPA</span>
+    <span class="chip green">Risk Score Engine</span>
+    <span class="chip rust">2-Language i18n</span>
+    <span class="chip rust">Live FX Rate API</span>
+    <span class="chip rust">Real ERP Data</span>
+  </div>
+</section>
+
+<!-- METRICS BAND -->
+<div class="metrics-band">
+  <div class="metric">
+    <div class="m-val">211<em>+</em></div>
+    <div class="m-label">Real ERP Order Lines</div>
+    <div class="m-label">Validated on real ERP order data from a live B2B operations environment</div>
+  </div>
+  <div class="metric">
+    <div class="m-val">2</div>
+    <div class="m-label">Languages (EN/KO)</div>
+  </div>
+  <div class="metric">
+    <div class="m-val">6<em>개</em></div>
+    <div class="m-label">Key Architecture Decisions</div>
+  </div>
+  <div class="metric">
+    <div class="m-val">v<em>15</em></div>
+    <div class="m-label">Current Version</div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">발굴한 문제</h2>
+  </div>
+  <div class="problem-grid">
+    <div class="problem-card fade-in">
+      <div class="p-tag">Problem 01 · Urgency Gap</div>
+      <div class="p-title">긴급 요청 대응 공백</div>
+      <p class="p-body">ERP가 "capacity 없음"을 표시해도 담당자는 비공식 네트워크로 처리. 매주 반복되는 패턴이지만 시스템에 기록되지 않아 누적 학습 불가. 긴급 전환율 40%+ 고객사가 존재함에도 사전 감지 체계 없음.</p>
+    </div>
+    <div class="problem-card fade-in">
+      <div class="p-tag">Problem 02 · Data Scatter</div>
+      <div class="p-title">업무·보고 체계 분산</div>
+      <p class="p-body">채팅·이메일·Teams·ERP 4개 채널에 정보가 분산. 누락·오류 발생 시 원인 추적 불가. 기존 ERP는 조회 기능만 있고, 국내 솔루션은 유통 버티컬에 맞지 않음.</p>
+    </div>
+    <div class="problem-card fade-in">
+      <div class="p-tag">Problem 03 · Visibility</div>
+      <div class="p-title">현장 실무 가시성 부재</div>
+      <p class="p-body">ERP 데이터는 있지만 "지금 뭐가 위험한가"를 한눈에 보는 레이어가 없음. 월말 선적 집중, 리드타임 단축 패턴 등 반복적 신호를 수동으로 감지 중.</p>
+    </div>
+  </div>
+
+  <!-- 관찰: 왜 발생하는가 -->
+  <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);">
+    <div style="background:var(--paper2);padding:18px 20px;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">현장에서 직접 관찰한 것</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:7px;">
+        <li style="font-size:13px;color:var(--muted);padding-left:16px;position:relative;"><span style="position:absolute;left:0;color:var(--accent2)">→</span>담당자가 ERP 말고 메신저로 먼저 확인한다</li>
+        <li style="font-size:13px;color:var(--muted);padding-left:16px;position:relative;"><span style="position:absolute;left:0;color:var(--accent2)">→</span>긴급 처리 여부가 담당자 개인 기억에 의존한다</li>
+        <li style="font-size:13px;color:var(--muted);padding-left:16px;position:relative;"><span style="position:absolute;left:0;color:var(--accent2)">→</span>월말마다 "이번 달 선적 어떻게 됐어요?"를 반복한다</li>
+      </ul>
+    </div>
+    <div style="background:var(--paper2);padding:18px 20px;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">핵심 판단</div>
+      <p style="font-size:13px;color:var(--ink);line-height:1.7;font-weight:500;">
+        문제의 본질은 데이터 부족이 아니다.<br>
+        <span style="color:var(--accent2)">"이미 있는 데이터를 판단 가능한 형태로<br>해석하는 레이어의 부재"</span>
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; padding:20px 22px; border:1px solid var(--border); background:var(--paper2);">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">공통 구조적 원인</div>
+    <p style="font-size:13.5px;color:var(--muted);line-height:1.7;">
+      ERP 교체 사이클 2~3년 + 임원급 결재 구조 → 현장 속도와 시스템 업데이트 속도의 갭.<br>
+      <strong style="color:var(--ink)">해결 방향: ERP를 교체하는 게 아니라 옆에 붙이는 경량 레이어.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- KEY DECISIONS -->
+<section class="section" id="decisions">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">핵심 결정 6가지</h2>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted);margin-bottom:24px;line-height:1.7;">
+    각 결정은 <strong style="color:var(--ink)">왜 그 선택을 했는가</strong>와 <strong style="color:var(--ink)">무엇을 포기했는가</strong>를 함께 기록합니다.
+    제약 조건 안에서의 판단이 설계를 만든다는 것을 이 프로젝트를 통해 체득했습니다.
+  </p>
+  <table class="decision-table">
+    <thead>
+      <tr>
+        <th style="width:28%">결정</th>
+        <th style="width:38%">왜 이렇게 결정했는가</th>
+        <th style="width:34%">포기한 것 (Trade-off)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="decision-col">ERP 교체 대신 경량 레이어</td>
+        <td class="why-col">ERP 교체는 의사결정 2~3년 + 임원급 결재. "ERP 교체 없이 도입"이 보수적 조직의 핵심 설득 포인트.</td>
+        <td class="tradeoff-col">실시간 데이터 동기화<br>→ 엑셀 업로드 주기 의존</td>
+      </tr>
+      <tr>
+        <td class="decision-col">엑셀 업로드 기반 MVP</td>
+        <td class="why-col">현장 인터뷰 결과: "ERP에서 복붙해서 엑셀 저장"이 실제 워크플로우. 기존 습관 유지 = 도입 저항 최소화.</td>
+        <td class="tradeoff-col">실시간성<br>→ API 연동은 Phase 2</td>
+      </tr>
+      <tr>
+        <td class="decision-col">Risk Score 기반 판정</td>
+        <td class="why-col">단순 조건(납기 지남 → 지연)으로는 복합 상황 미반영. 점수 합산 방식은 AI 입력값으로도 활용 가능.</td>
+        <td class="tradeoff-col">단순성<br>→ 복잡성 증가 감수</td>
+      </tr>
+      <tr>
+        <td class="decision-col">Sale Order 1개 시트만 있어도 작동</td>
+        <td class="why-col">4개 시트 강제 시 도입 장벽↑. 단계적 도입: Sale Order → + Shipment List 순서로. 오탐은 "Unknown" 뱃지 + 배너로 명시.</td>
+        <td class="tradeoff-col">출하 정확도<br>→ 데이터 없으면 Unknown 표시</td>
+      </tr>
+      <tr>
+        <td class="decision-col">localStorage → API 교체 가능 구조</td>
+        <td class="why-col">팀 공유는 검증 전에 만들면 낭비. 단, appendEvent() 내부 한 줄만 교체하면 전환되도록 설계.</td>
+        <td class="tradeoff-col">팀 실시간 공유<br>→ Phase 2에서 API 전환</td>
+      </tr>
+      <tr>
+        <td class="decision-col">데이터 모델 / 평가 / UI 3단 분리</td>
+        <td class="why-col">ERP API 연동 시 mapRawToOrder()만 교체, 서버 사이드 평가 전환 시 evaluateOrder()만 이동. 레이어 독립성 확보.</td>
+        <td class="tradeoff-col">초기 구현 단순성<br>→ 구조 복잡성 증가</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">기술 아키텍처</h2>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted);margin-bottom:24px;line-height:1.7;">
+    엑셀 업로드부터 위험도 계산, 화면 출력, 기록 저장까지의 내부 처리 흐름
+  </p>
+
+  <div class="arch-pipeline">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">데이터 파이프라인 (Phase 1 · Frontend-only)</div>
+
+    <div class="pipeline-row">
+      <span class="pipe-label">Parse</span>
+      <div class="pipe-node accent">Excel Upload</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node">Data Read</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node">Standardized Orders</div>
+      <span style="font-size:11px;color:var(--muted);align-self:center;padding:0 4px;">엑셀 파일을 업로드하면 데이터를 읽고, 각기 다른 형식의 데이터를 표준화된 주문 구조로 변환 (parseExcel / mapRawToOrder)</span>
+    </div>
+
+    <div class="pipeline-row">
+      <span class="pipe-label">Evaluate</span>
+      <div class="pipe-node">Order Model</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node rust">Risk Evaluation</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node rust">Risk Score</div>
+      <span style="font-size:11px;color:var(--muted);align-self:center;padding:0 4px;">정리된 주문 데이터를 기반으로 납기, 긴급 여부, 리드타임 등을 반영해 각 주문의 위험도를 점수로 계산 (evaluateOrder)</span>
+    </div>
+
+    <div class="pipeline-row">
+      <span class="pipe-label">Render</span>
+      <div class="pipe-node rust">Scored Orders</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node green">Visual Render</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node green">Analytics Tab</div>
+      <span class="pipe-arrow">+</span>
+      <div class="pipe-node green">Shipment Tab</div>
+      <span style="font-size:11px;color:var(--muted);align-self:center;padding:0 4px;">계산된 위험도와 데이터를 분석 화면과 출하 화면에 시각적으로 표시 (render)</span>
+    </div>
+
+    <div class="pipeline-row">
+      <span class="pipe-label">Events</span>
+      <div class="pipe-node">Work Events</div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-node">Record Save</div>
+      <span class="pipe-arrow">→</span>
+      <span style="font-size:11.5px;font-family:var(--mono);color:var(--accent2);align-self:center;">주문 업로드, 지연 감지, 메모 추가 등 업무 이벤트를 기록으로 저장하고, 이후 대응 판단 및 인수인계에 재사용 가능한 구조로 축적 (appendEvent → localStorage)</span>
+    </div>
+  </div>
+
+  <div class="arch-note">
+    <strong>Phase 2 전환 포인트:</strong> 현재는 브라우저 내부 저장 구조이며,
+    Phase 2에서는 서버/DB 기반 팀 공유 구조로 확장 예정.
+    Communication logs → Auto Handover → Structured Knowledge → Scenario / Guide reuse
+  </div>
+
+  <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="padding:18px;border:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Phase 1 Stack</div>
+      <div style="font-size:13px;line-height:2;font-family:var(--mono);">
+        Frontend: Single HTML file<br>
+        State: localStorage<br>
+        FX Rates: open.er-api.com<br>
+        i18n: EN / KO
+      </div>
+    </div>
+    <div style="padding:18px;border:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Phase 2 Stack (Designed)</div>
+      <div style="font-size:13px;line-height:2;font-family:var(--mono);">
+        Backend: FastAPI + MySQL<br>
+        AI: Gemini → Azure OpenAI<br>
+        Deploy: Vercel + Railway<br>
+        Auth: X-User-Name header
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;padding:16px 18px;border:1px solid var(--border);background:var(--paper2);">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Risk Score Formula</div>
+    <div style="font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--ink);">
+      riskScore = <span style="color:var(--accent2)">50</span> (overdue)
+               + <span style="color:var(--accent2)">30</span> (imminent ≤2d)
+               + <span style="color:var(--accent2)">20</span> (short lead ≤3d)
+               + <span style="color:var(--accent2)">10</span> (not shipped)
+               + <span style="color:var(--accent2)">40</span> (urgent flag)
+      <br>
+      <span style="color:var(--muted)">→ 0–29: Normal · 30–59: Warning · 60+: Critical</span>
+    </div>
+    <div style="margin-top:6px;color:var(--muted);font-size:12.5px;">
+      → 복합 조건을 하나의 우선순위 판단 기준으로 압축
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">기능 현황</h2>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted);margin-bottom:24px;line-height:1.7;">
+    현재 사용자가 실제로 사용할 수 있는 기능과 향후 확장 기능을 구분
+  </p>
+  <div class="feat-grid">
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Order List · Risk Score · Filter / Sort</div>
+        <div class="feat-note">엑셀 데이터를 기반으로 주문 목록을 생성하고, 위험도 기준으로 정렬 및 필터링 가능</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Analytics Tab — 수주 패턴 분석</div>
+        <div class="feat-note">주문 데이터를 기반으로 긴급률, 리드타임, 고객별 패턴을 시각적으로 분석</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Shipment Tab — 출하 분석</div>
+        <div class="feat-note">출하 방식과 고객별 출하 현황을 별도로 분석하여 운영 상태를 확인할 수 있음</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Event Log · Processing History</div>
+        <div class="feat-note">주문 처리 과정에서 발생한 이벤트를 기록하여 이력 기반 추적 가능</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Auto Handover Generator / Handover Library</div>
+        <div class="feat-note">이메일 및 메신저 기록을 기반으로 구조화된 인수인계 초안을 자동 생성하고 저장</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">2-Language i18n</div>
+        <div class="feat-note">EN/KO 번역 딕셔너리, localStorage 언어 상태, 알림 메시지 동적 번역 포함</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Live FX Rate · KRW 환산</div>
+        <div class="feat-note">open.er-api.com 실시간 환율, 1시간 캐시, USD/EUR/JPY → KRW 카드 합계 환산</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Reverse Shipment Lookup</div>
+        <div class="feat-note">기간 불일치 문제 해결: Shipment List의 SO_NO를 집합(Set)으로 체크해 수주-출하 기간이 다른 경우도 매칭</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Batch Compare</div>
+        <div class="feat-note">이전 업로드와 비교해 상태 변경(지연 신규 감지, 출하 완료 등) 이벤트 자동 생성</div>
+      </div>
+      <span class="pill pill-done">✓ Done</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">FastAPI + MySQL Backend</div>
+        <div class="feat-note">/api/history GET·POST, /api/ai/analyze, /api/users/me. Gemini → Azure OpenAI 교체 경로 설계 완료.</div>
+      </div>
+      <span class="pill pill-debug">⏳ Phase 2</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">AI Pattern Insights</div>
+        <div class="feat-note">엑셀 업로드 시 집계 데이터 → Gemini/Azure OpenAI → 고객사 패턴 자동 인사이트 생성</div>
+      </div>
+      <span class="pill pill-next">Planned</span>
+    </div>
+    <div class="feat-row">
+      <div>
+        <div class="feat-name">Monthly Trend + Forecast</div>
+        <div class="feat-note">3개월+ 누적 시 월별 수주 트렌드, 이동평균 기반 다음 달 예측, 급증/급락 알림</div>
+      </div>
+      <span class="pill pill-next">After Data Accumulation</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT I LEARNED -->
+<section class="section">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">판단의 흐름 — 무엇이 달라졌는가</h2>
+  </div>
+
+  <!-- 자소서용 스토리 구조: 문제→관찰→판단→실행→결과 -->
+  <div style="border:1px solid var(--border);padding:28px 28px;margin-bottom:24px;background:var(--paper2);">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:20px;">이 프로젝트의 판단 흐름</div>
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;">① 문제</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.7;">ERP 데이터는 있지만 "지금 어떤 주문이 위험한지" 즉시 판단할 수 없는 상태. 담당자가 비공식 채널로 처리하며 누락·반복이 발생.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;">② 관찰</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.7;">문제의 원인은 데이터 부족이 아니라 <strong>"해석 레이어의 부재"</strong>. ERP를 교체해도 해결되지 않는 구조적 문제.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;">③ 판단</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.7;">ERP 교체(2~3년 사이클) 대신 기존 엑셀 워크플로우를 유지하면서 위험도를 자동 계산하는 경량 레이어를 선택. 도입 저항 최소화가 핵심 기준.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;">④ 실행</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.7;">납기·긴급도·리드타임·출하 여부를 가중합산한 Risk Score 모델 설계. 실제 ERP 데이터(211건) 연동 검증. 2개국 언어 지원으로 현지 팀 활용 가능성 확보.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px 1fr;gap:16px;padding:14px 0;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent2);padding-top:2px;">⑤ 결과</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.7;">
+          
+          <strong>업무 판단 구조 전환</strong><br>
+          ERP 조회 → 담당자 수동 판단 → 대응 결정 구조를<br>
+          <strong>엑셀 업로드 → 리스크 자동 정렬 → 즉시 대응 구조</strong>로 전환
+          
+          <br><br>
+          
+          <strong>반복 문제 사전 식별 가능</strong><br>
+          긴급률 40%+ 고객사 패턴을 수동 기억이 아닌<br>
+          데이터 기반으로 사전 감지 가능
+          
+          <br><br>
+          
+          <strong>사용자 중심의 실행 구조 확보</strong><br>
+          담당자가 ERP를 수작업으로 탐색하던 과정을<br>
+          업로드 직후 <strong>우선 대응 대상을 바로 식별할 수 있는 상태</strong>로 전환
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-grid">
+    <div class="highlight-box fade-in">
+      <div class="hb-tag">Constraint-Based</div>
+      <div class="hb-num">01</div>
+      <div class="hb-title">제약 조건이 설계를 만든다</div>
+      <div class="hb-body">ERP 접근 불가 — 이 제약이 엑셀 업로드·로컬 저장·단계적 도입 구조를 만들었다. 제약은 장애물이 아니라 설계 기준이다.</div>
+    </div>
+    <div class="highlight-box fade-in">
+      <div class="hb-tag">AI as Layer</div>
+      <div class="hb-num">02</div>
+      <div class="hb-title">AI 제공자는 바뀌지만 구조는 남는다</div>
+      <div class="hb-body">Gemini → Azure OpenAI 교체를 환경변수 한 줄로 설계. 중요한 건 어떤 AI를 쓰느냐가 아니라, 어떤 데이터를 어떤 형태로 AI에 연결하느냐다. Risk Score가 AI 입력값이 되도록 파이프라인을 선행 설계했다.</div>
+    </div>
+    <div class="highlight-box fade-in">
+      <div class="hb-tag">Validation First</div>
+      <div class="hb-num">03</div>
+      <div class="hb-title">배포보다 반응이 먼저다</div>
+      <div class="hb-body">"팀이랑 같이 실시간으로 보고 싶다"는 반응 1건을 Phase 2 착수 조건으로 설정했다. 코드가 완성돼도 쓸 사람이 없으면 제품이 아니다. 검증 조건을 먼저 정의하고 개발한다.</div>
+    </div>
+    <div class="highlight-box fade-in">
+      <div class="hb-tag">PM's Role</div>
+      <div class="hb-num">04</div>
+      <div class="hb-title">PM의 역할은 기술이 아니라 설계다</div>
+      <div class="hb-body">기술로 문제를 해결하는 게 아니라, 조직의 제약 조건 안에서 실행 가능한 구조를 설계하는 것. mapRawToOrder → evaluateOrder → render 3단 분리는 지금이 아니라 다음 단계를 위해 만들었다.</div>
+    </div>
+    <div class="highlight-box fade-in">
+      <div class="hb-tag">User Signal</div>
+      <div class="hb-num">05</div>
+      <div class="hb-title">사용자 반응 기반 검증 단계 진입</div>
+      <div class="hb-body">
+        초기 테스트 과정에서<br>
+        “이거 있으면 매번 ERP를 뒤지지 않아도 되겠다”는 반응을 확인했다.<br><br>
+        기능 완성 자체보다 <strong>반복 사용 가능성</strong>을 기준으로<br>
+        Phase 2 진입 여부를 판단하도록 설계했다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="section" id="roadmap">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">로드맵</h2>
+  </div>
+  <div class="roadmap">
+    <div class="roadmap-col">
+      <div class="phase phase-done">✓ Phase 1 · Complete</div>
+      <ul>
+        <li class="done">Risk Score 기반 판정 엔진</li>
+        <li class="done">이벤트 로그 아키텍처</li>
+        <li class="done">실 ERP 데이터 연동</li>
+        <li class="done">Analytics / Shipment 탭</li>
+        <li class="done">2개 언어 i18n</li>
+        <li class="done">FastAPI 백엔드 설계 완료</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <div class="phase phase-next">→ Phase 2 · Condition: 1 Paid User</div>
+      <ul>
+        <li>FastAPI + MySQL 배포</li>
+        <li>appendEvent → POST /api/history</li>
+        <li>팀 공유 히스토리</li>
+        <li>Gemini AI 메모 자동 생성</li>
+        <li>Railway + Vercel 배포</li>
+      </ul>
+    </div>
+    <div class="roadmap-col">
+      <div class="phase phase-later">○ Phase 3 · Azure OpenAI</div>
+      <ul>
+        <li>AI_PROVIDER=azure 전환</li>
+        <li>월별 트렌드 차트</li>
+        <li>다음달 수주 예측</li>
+        <li>고객사 오더 없음 감지</li>
+        <li>멀티 테넌트 + Stripe</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-block">
+  <div class="cta-text">
+    반복되는 운영 문제를 식별하고,<br>
+    <em>실행 가능한 판단 구조로 전환한</em> 포트폴리오입니다.
+  </div>
+  <div class="cta-links">
+    <a href="https://www.notion.so/349c71bbd8368059a083e005a51b86d9?source=copy_link" target="_blank" class="cta-link primary">Notion Portfolio →</a>
+    <a href="#decisions" class="cta-link">Key Decisions</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">Order Risk & Decision Intelligence System</div>
+  <div class="footer-right">FastAPI + MySQL + Gemini AI · vv15 · April 2026</div>
+</footer>
+
+</div>
+</body>
+</html>
