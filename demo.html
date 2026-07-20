@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
@@ -23,6 +23,10 @@
   .upload-area.loading { pointer-events: none; opacity: .7; }
   .upload-area p { color: #666; margin-top: 8px; font-size: 13px; }
   .upload-area .icon { font-size: 36px; }
+  /* 샘플 자동 로드 후 업로드 영역을 접힌 형태로 축소 (내 파일로 시도하기 유지) */
+  .upload-area.collapsed { padding: 14px 20px; text-align: left; }
+  .upload-area.collapsed .icon, .upload-area.collapsed p { display: none; }
+  .upload-area.collapsed button { margin-top: 0; }
   .upload-loading-msg { font-size: 13px; color: #2E75B6; margin-top: 10px; display: none; }
   /* Toast 알림 */
   #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
@@ -672,6 +676,9 @@
 </header>
 
 <div class="container">
+  <div id="autoSampleBadge" class="an-alert info" style="display:none;margin-bottom:12px;">
+    <span data-i18n="banner.autoSample">Sample data is currently loaded. You can also upload your own file to check it.</span>
+  </div>
   <p style="font-size:12px;color:#666;margin-bottom:10px;" data-i18n="demo.core">
     This demo shows how order risks are identified and prioritized for execution.
   </p>
@@ -1503,7 +1510,7 @@ const Store = {
 };
 
 const LANG_STORAGE_KEY = 'order_dashboard_lang';
-let currentLang = localStorage.getItem(LANG_STORAGE_KEY) === 'ko' ? 'ko' : 'en';
+let currentLang = localStorage.getItem(LANG_STORAGE_KEY) === 'en' ? 'en' : 'ko';
 let lastFxBadgeSource = 'fallback';
 let lastBannerWorkbook = null;
 
@@ -1585,6 +1592,7 @@ const I18N = {
     'upload.formats': 'Supported formats: .xlsx, .xls',
     'upload.select': 'Select File',
     'upload.sample': 'Load Sample Data',
+    'banner.autoSample': 'Sample data is currently loaded. You can also upload your own file to check it.',
     'upload.demo.title': 'Demo Mode',
     'upload.demo.desc': 'Upload your own Excel file or click <strong>Load Sample Data</strong> to see how the system identifies urgent orders and prioritizes actions.',
     'upload.demo.note': 'This demo runs entirely in the browser. No login or server connection is required.',
@@ -1701,6 +1709,10 @@ const I18N = {
     'filter.apply': 'Apply',
     'table.customer': 'Customer',
     'table.country': 'Country',
+    'table.orderId': 'Order ID',
+    'table.item': 'Item',
+    'table.issue': 'Issue',
+    'table.nextStep': 'Next Step',
     'table.orders': 'Orders',
     'table.totalKrw': 'Total (USD)',
     'table.share': 'Share',
@@ -1715,7 +1727,6 @@ const I18N = {
     'table.daysDueOverdue': 'Days to Due / Overdue',
     'table.suggestedAction': 'Suggested Action',
     'label.totalOrders': 'Total orders',
-    'label.urgentRate': '긴급 비율',
     'label.urgentRate': 'Urgent Rate',
     'label.avgLeadTime': 'Average Lead Time',
     'label.totalValue': 'Total Value',
@@ -1838,7 +1849,7 @@ const I18N = {
     'sort.noValues': 'No selectable values.',
     'sort.rangeHelp': 'Enter a numeric range to filter.',
     'sort.dateHelp': 'Enter a date range to filter.',
-    'shipment.queue.title': '출하 우선순위 큐 ({count})',
+    'shipment.queue.title': 'Shipment Priority Queue ({count})',
     'shipment.queue.source.shipment': 'Based on Shipment Records',
     'shipment.queue.source.derived': 'Derived from Order Data',
     'shipment.summary.overdue': 'Overdue Unshipped',
@@ -1902,34 +1913,34 @@ const I18N = {
     'handover.field.item': '관련 Item',
     'handover.field.issueTypes': '이슈 유형',
     'handover.field.notes': '추가 메모',
-    'handover.field.customerTraits': 'Customer Traits',
-    'handover.field.doNot': 'Do Not',
-    'handover.field.recommendedStyle': 'Recommended Style',
-    'handover.field.escalationRule': 'Escalation Rule',
-    'handover.field.internalOwner': 'Internal Owner / Related Team',
-    'handover.auto.title': 'Auto Handover Generator',
+    'handover.field.customerTraits': '고객 특성',
+    'handover.field.doNot': '금지 사항',
+    'handover.field.recommendedStyle': '권장 응대 스타일',
+    'handover.field.escalationRule': '에스컬레이션 기준',
+    'handover.field.internalOwner': '내부 담당자 / 관련 팀',
+    'handover.auto.title': '인수인계 자동 생성',
     'handover.auto.placeholder': '이메일/메신저 내용을 여기에 붙여넣으세요.\n\n예시:\nHi team,\nWe are sorry to inform that shipment will be delayed...\nETA will be next Monday...',
     'handover.auto.tip': 'Tip: 고객 커뮤니케이션이 최소 1개 이상 포함되면 추출 품질이 좋아집니다.',
-    'handover.auto.generate': 'Generate Handover',
+    'handover.auto.generate': '인수인계 생성',
     'handover.auto.generating': '커뮤니케이션 내용을 분석하는 중입니다...',
-    'handover.auto.summary': 'Situation Summary',
+    'handover.auto.summary': '상황 요약',
     'handover.auto.generatedNote': '아래 추출 결과는 저장 전에 자유롭게 수정할 수 있습니다.',
     'handover.auto.original': '원문 보기',
-    'handover.auto.save': 'Save as Handover',
-    'handover.auto.discard': 'Discard',
+    'handover.auto.save': '인수인계로 저장',
+    'handover.auto.discard': '취소',
     'handover.auto.empty': '먼저 이메일 또는 메신저 내용을 붙여넣어 주세요.',
     'handover.auto.failed': '인수인계 자동 생성에 실패했습니다. 다시 시도해 주세요.',
     'handover.auto.noResult': '구조화할 정보가 충분하지 않습니다. 더 구체적인 내용을 입력해 주세요.',
     'handover.auto.done': '구조화된 인수인계 초안이 생성되었습니다. 저장 전에 수정해 주세요.',
-    'handover.stepNo': 'Step No',
-    'handover.stepTitle': 'Step Title',
-    'handover.stepDescription': 'Description',
-    'handover.stepChecklist': 'Checklist',
-    'handover.stepTemplate': 'Template Message',
-    'handover.messageType': 'Message Type',
-    'handover.messageTitle': 'Title',
-    'handover.messageContent': 'Content',
-    'handover.action': 'Action',
+    'handover.stepNo': '단계',
+    'handover.stepTitle': '단계명',
+    'handover.stepDescription': '설명',
+    'handover.stepChecklist': '체크리스트',
+    'handover.stepTemplate': '템플릿 메시지',
+    'handover.messageType': '메시지 유형',
+    'handover.messageTitle': '제목',
+    'handover.messageContent': '내용',
+    'handover.action': '관리',
     'handover.addStep': '행 추가',
     'handover.addMessage': '문구 추가',
     'handover.save': '인수인계 저장',
@@ -1943,6 +1954,7 @@ const I18N = {
     'upload.formats': '지원 형식: .xlsx, .xls',
     'upload.select': '파일 선택',
     'upload.sample': '샘플 데이터 불러오기',
+    'banner.autoSample': '샘플 데이터가 로드된 상태입니다. 직접 파일을 업로드해 확인할 수도 있습니다.',
     'upload.demo.title': '데모 모드',
     'upload.demo.desc': '엑셀 파일을 업로드하거나 <strong>샘플 데이터 불러오기</strong>를 눌러 시스템이 긴급 주문을 어떻게 식별하고 우선순위를 정하는지 확인할 수 있습니다.',
     'upload.demo.note': '이 데모는 브라우저 안에서만 동작하며 로그인이나 서버 연결 없이 바로 확인할 수 있습니다.',
@@ -2012,11 +2024,11 @@ const I18N = {
     'panel.guideError': '사내 대응 가이드를 불러오지 못했습니다.',
     'panel.guideSource': '응답 소스',
     'panel.guideReferences': '참고한 내부 가이드',
-    'ops.title': 'Ops Assistant',
+    'ops.title': '운영 어시스턴트',
     'ops.subtitle': '현재 이슈를 해석하고, 내부 가이드를 끌어와 다음 운영 행동을 정리합니다.',
     'ops.openFromPanel': 'Ops Assistant 열기',
     'ops.placeholder': '이 주문이 왜 위험한가? 다음에 무엇을 해야 하나? 고객 특성을 보여줘',
-    'ops.ask': 'Ask',
+    'ops.ask': '질문',
     'ops.noContext.title': '선택된 주문이 없습니다',
     'ops.noContext.body': '고객, 이슈, 대응 가이드에 대해 물어보거나 Queue / Risk / Scenario에서 Ops Assistant를 열어보세요.',
     'ops.context': '현재 컨텍스트',
@@ -2027,22 +2039,22 @@ const I18N = {
     'ops.quick.steps': '대응 단계 제안',
     'ops.loading': '현재 운영 컨텍스트를 해석하는 중입니다...',
     'ops.error': 'Ops Assistant 응답을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
-    'ops.section.summary': 'Situation Summary',
-    'ops.section.response': 'Recommended Response',
-    'ops.section.cautions': 'Cautions / Customer Notes',
-    'ops.section.guides': 'Related Internal Guide / Handover',
-    'ops.section.next': 'Next Action',
+    'ops.section.summary': '상황 요약',
+    'ops.section.response': '권장 대응',
+    'ops.section.cautions': '주의사항 / 고객 메모',
+    'ops.section.guides': '관련 내부 가이드 / 인수인계',
+    'ops.section.next': '다음 조치',
     'ops.action.openScenario': 'Scenario 열기',
     'ops.action.copy': '응답 문구 복사',
     'ops.action.handover': '관련 인수인계 보기',
     'ops.action.nextStep': '다음 Step으로 이동',
-    'ops.context.customer': 'Customer',
-    'ops.context.issue': 'Issue',
-    'ops.context.priority': 'Priority',
-    'ops.context.order': 'Order',
-    'ops.context.step': 'Current Step',
-    'ops.context.risk': 'Risk Signal',
-    'ops.context.scenario': 'Scenario',
+    'ops.context.customer': '고객',
+    'ops.context.issue': '이슈',
+    'ops.context.priority': '우선순위',
+    'ops.context.order': '주문',
+    'ops.context.step': '현재 단계',
+    'ops.context.risk': '리스크 신호',
+    'ops.context.scenario': '시나리오',
     'ops.copied': '추천 응답 문구를 복사했습니다.',
     'ops.related.none': '이 컨텍스트에 연결된 handover 기반 가이드를 찾지 못했습니다.',
     'panel.memoPlaceholder': '메모를 입력하세요...',
@@ -2063,10 +2075,6 @@ const I18N = {
     'table.item': '품목',
     'table.issue': '이슈',
     'table.nextStep': '다음 단계',
-    'table.orderId': 'Order ID',
-    'table.item': 'Item',
-    'table.issue': 'Issue',
-    'table.nextStep': 'Next Step',
     'table.orders': '주문수',
     'table.totalKrw': '총액(KRW)',
     'table.share': '비중',
@@ -2080,13 +2088,13 @@ const I18N = {
     'table.shipmentIssue': '출하 이슈',
     'table.daysDueOverdue': '납기 / 초과 일수',
     'table.suggestedAction': '권장 액션',
-    'label.totalOrders': 'Total Orders',
-    'label.urgentRate': 'Urgent Rate',
-    'label.avgLeadTime': 'Avg Lead Time',
-    'label.totalValue': 'Total Value',
-    'label.shipmentScope': 'Shipment Scope',
-    'label.orderQty': 'Order Qty',
-    'label.customers': 'Customers',
+    'label.totalOrders': '총 주문 수',
+    'label.urgentRate': '긴급 비율',
+    'label.avgLeadTime': '평균 리드타임',
+    'label.totalValue': '총 금액',
+    'label.shipmentScope': '출하 범위',
+    'label.orderQty': '주문 수량',
+    'label.customers': '고객사 수',
     'sub.shortLeadRatio': '단기 리드 비중 {value}%',
     'sub.priorityCandidates': '우선 검토 대상',
     'sub.shipmentReviewScope': '출하 검토 범위',
@@ -2125,9 +2133,9 @@ const I18N = {
     'ai.summary.anomalies': '- {count}개의 이상 징후가 감지되었습니다',
     'ai.summary.risk': '- 핵심 리스크: 고객 집중도 및 리드타임 압박',
     'watch.suggestedAction': '추천 액션',
-    'risk.high': 'High',
-    'risk.mid': 'Medium',
-    'risk.low': 'Low',
+    'risk.high': '높음',
+    'risk.mid': '보통',
+    'risk.low': '낮음',
     'risk.none': '중대한 패턴 리스크 없음',
     'risk.none.message': '현재 주문 패턴 상 즉시 주시할 이상 징후는 제한적입니다.',
     'risk.none.action': '현재 모니터링 주기를 유지하면서 상위 고객과 긴급 비중만 점검하세요.',
@@ -2166,7 +2174,7 @@ const I18N = {
     'action.shortLead': '리드타임 부족 → 공급 확인',
     'action.unmatched': '출하 연계 정보 확인 → 매칭 점검',
     'action.monitor': '모니터링',
-    'panel.tab.action': 'Action',
+    'panel.tab.action': '대응',
     'panel.tab.guide': '가이드',
     'panel.tab.history': '히스토리',
     'panel.orderDetail': '주문 상세',
@@ -2203,7 +2211,7 @@ const I18N = {
     'sort.noValues': '선택 가능한 값이 없습니다.',
     'sort.rangeHelp': '범위를 입력해 필터링합니다.',
     'sort.dateHelp': '기간을 입력해 필터링합니다.',
-    'shipment.queue.title': 'Shipment Priority Queue ({count})',
+    'shipment.queue.title': '출하 우선순위 큐 ({count})',
     'shipment.queue.source.shipment': 'Shipment Records 기준',
     'shipment.queue.source.derived': '주문 데이터 기반',
     'shipment.summary.overdue': '납기 초과 미출하',
@@ -2226,7 +2234,7 @@ const I18N = {
     'shipment.qty.sub': '검토 수량',
     'shipment.customers.sub': '주의 고객 수',
     'render.meaninglessChart': '데이터가 부족하거나 미분류 상태입니다. 소스 필드 표준화 후 다시 확인하세요.',
-    'history.system': 'System',
+    'history.system': '시스템',
     'fx.title.live': '실시간 환율 (open.er-api.com)',
     'fx.title.cached': '캐시된 환율 (1시간 단위 갱신)',
     'fx.title.fallback': '기본 환율 사용 — API 연결 불가'
@@ -2348,9 +2356,12 @@ async function fetchFxRates() {
     }
   } catch {}
 
+  // 외부 API 응답이 늦어져 백그라운드 로딩이 무한정 길어지지 않도록 5초 타임아웃
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
   try {
     // open.er-api.com: free, no key, CORS-friendly, base = USD
-    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: controller.signal });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data.rates) throw new Error('No rates');
@@ -2368,9 +2379,11 @@ async function fetchFxRates() {
     localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates: fxRates }));
     updateFxBadge('live');
   } catch (e) {
-    // Fallback rates if API fails
+    // Fallback rates if API 응답 실패/타임아웃(AbortError) 등 어떤 이유로든 실패하면 고정값 사용
     fxRates = { KRW: 1, USD: 1380, EUR: 1490, JPY: 9.3, CNY: 190 };
     updateFxBadge('fallback');
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -3784,9 +3797,9 @@ function formatHandoverDocCount(count) {
 }
 
 function getHandoverTransformLabel(status) {
-  if (status === 'synced') return currentLang === 'ko' ? 'Synced' : 'Synced';
-  if (status === 'failed') return currentLang === 'ko' ? 'Failed' : 'Failed';
-  return currentLang === 'ko' ? 'Pending' : 'Pending';
+  if (status === 'synced') return currentLang === 'ko' ? '동기화됨' : 'Synced';
+  if (status === 'failed') return currentLang === 'ko' ? '실패' : 'Failed';
+  return currentLang === 'ko' ? '대기중' : 'Pending';
 }
 
 function getHandoverTransformBadgeClass(status) {
@@ -3949,14 +3962,14 @@ function renderHandoverAdminList() {
     const issueText = (master.issue_types || []).map(getIssueTypeLabel).join(', ') || '-';
     const statusClass = getHandoverTransformBadgeClass(doc.transform_status);
     const statusLabel = getHandoverTransformLabel(doc.transform_status);
-    const lastGenerated = doc.last_generated_at ? formatWatchDate(doc.last_generated_at) : (currentLang === 'ko' ? 'Not generated' : 'Not generated');
+    const lastGenerated = doc.last_generated_at ? formatWatchDate(doc.last_generated_at) : (currentLang === 'ko' ? '미생성' : 'Not generated');
     return `
       <button type="button" class="handover-doc-item${activeClass}" onclick="selectHandoverDocument('${escapeAttr(doc.id)}')">
         <div class="handover-doc-title">${escapeHtml(master.title || '-') }</div>
-        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? 'Customer: ' : 'Customer: ') + (master.customer_name || '-'))}</div>
-        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? 'Issue: ' : 'Issue: ') + issueText)}</div>
-        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? 'Owner: ' : 'Owner: ') + (master.owner || '-'))}</div>
-        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? 'Last Generated: ' : 'Last Generated: ') + lastGenerated)}</div>
+        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? '고객: ' : 'Customer: ') + (master.customer_name || '-'))}</div>
+        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? '이슈: ' : 'Issue: ') + issueText)}</div>
+        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? '담당자: ' : 'Owner: ') + (master.owner || '-'))}</div>
+        <div class="handover-doc-meta">${escapeHtml((currentLang === 'ko' ? '최근 생성: ' : 'Last Generated: ') + lastGenerated)}</div>
         <div class="handover-doc-foot">
           <span>${escapeHtml(`KB ${doc.generated_knowledge_count || 0}`)}</span>
           <span class="handover-status-badge ${statusClass}">${escapeHtml(statusLabel)}</span>
@@ -3982,10 +3995,10 @@ function renderHandoverDetailPanel(doc) {
   const transformClass = getHandoverTransformBadgeClass(doc.transform_status);
   panel.innerHTML = `
     <div class="handover-status-strip">
-      <span class="handover-status-badge ${transformClass}">${escapeHtml((currentLang === 'ko' ? 'Transform: ' : 'Transform: ') + transformLabel)}</span>
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Generated KB: ' : 'Generated KB: ') + (doc.generated_knowledge_count || 0))}</span>
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Updated: ' : 'Updated: ') + formatWatchDate(master.updated_at || doc.updated_at || doc.created_at))}</span>
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Last Generated: ' : 'Last Generated: ') + (doc.last_generated_at ? formatWatchDate(doc.last_generated_at) : (currentLang === 'ko' ? 'Not generated' : 'Not generated')))}</span>
+      <span class="handover-status-badge ${transformClass}">${escapeHtml((currentLang === 'ko' ? '변환: ' : 'Transform: ') + transformLabel)}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '생성 지식: ' : 'Generated KB: ') + (doc.generated_knowledge_count || 0))}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '수정일: ' : 'Updated: ') + formatWatchDate(master.updated_at || doc.updated_at || doc.created_at))}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '최근 생성: ' : 'Last Generated: ') + (doc.last_generated_at ? formatWatchDate(doc.last_generated_at) : (currentLang === 'ko' ? '미생성' : 'Not generated')))}</span>
     </div>
     <div class="handover-detail-grid">
       <div class="handover-detail-field"><label>${escapeHtml(t('handover.field.title'))}</label>${renderValue(master.title)}</div>
@@ -4066,8 +4079,8 @@ function renderGeneratedKnowledgePanel(entries) {
   if (!entries.length) {
     panel.innerHTML = `
       <div class="handover-status-strip">
-        <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Source ID: ' : 'Source ID: ') + selectedDoc.id)}</span>
-        <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Total Entries: ' : 'Total Entries: ') + 0)}</span>
+        <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '소스 ID: ' : 'Source ID: ') + selectedDoc.id)}</span>
+        <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '총 항목 수: ' : 'Total Entries: ') + 0)}</span>
       </div>
       <div class="handover-empty-state">${escapeHtml(currentLang === 'ko' ? '아직 생성된 Knowledge 엔트리가 없습니다. 저장 직후 또는 재생성 후 다시 확인해주세요.' : 'No generated knowledge entries are available yet. Save or regenerate and check again.')}</div>
     `;
@@ -4079,16 +4092,16 @@ function renderGeneratedKnowledgePanel(entries) {
     items: entries.filter(entry => entry.category === category),
   })).filter(group => group.items.length);
   const categoryLabel = category => ({
-    response_guide: currentLang === 'ko' ? 'Response Guide' : 'Response Guide',
-    customer_profile: currentLang === 'ko' ? 'Customer Profile' : 'Customer Profile',
-    internal_rule: currentLang === 'ko' ? 'Internal Rule' : 'Internal Rule',
-    message_template: currentLang === 'ko' ? 'Message Template' : 'Message Template',
+    response_guide: currentLang === 'ko' ? '응답 가이드' : 'Response Guide',
+    customer_profile: currentLang === 'ko' ? '고객 프로필' : 'Customer Profile',
+    internal_rule: currentLang === 'ko' ? '내부 규정' : 'Internal Rule',
+    message_template: currentLang === 'ko' ? '메시지 템플릿' : 'Message Template',
   }[category] || category);
   panel.innerHTML = `
     <div class="handover-status-strip">
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Source Type: ' : 'Source Type: ') + 'handover')}</span>
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Source ID: ' : 'Source ID: ') + selectedDoc.id)}</span>
-      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? 'Total Entries: ' : 'Total Entries: ') + entries.length)}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '소스 유형: ' : 'Source Type: ') + 'handover')}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '소스 ID: ' : 'Source ID: ') + selectedDoc.id)}</span>
+      <span class="handover-pill">${escapeHtml((currentLang === 'ko' ? '총 항목 수: ' : 'Total Entries: ') + entries.length)}</span>
     </div>
     <div class="handover-preview-list">
       ${grouped.map(group => `
@@ -4105,8 +4118,8 @@ function renderGeneratedKnowledgePanel(entries) {
                   <span class="handover-kb-cat">${escapeHtml(entry.category || 'knowledge')}</span>
                 </div>
                 <div class="handover-kb-meta">
-                  ${escapeHtml((currentLang === 'ko' ? 'Issue: ' : 'Issue: ') + (entry.issue_type || '-'))}
-                  ${entry.customer_name ? ` · ${escapeHtml((currentLang === 'ko' ? 'Customer: ' : 'Customer: ') + entry.customer_name)}` : ''}
+                  ${escapeHtml((currentLang === 'ko' ? '이슈: ' : 'Issue: ') + (entry.issue_type || '-'))}
+                  ${entry.customer_name ? ` · ${escapeHtml((currentLang === 'ko' ? '고객: ' : 'Customer: ') + entry.customer_name)}` : ''}
                   ${Array.isArray(entry.tags) && entry.tags.length ? ` · ${escapeHtml(entry.tags.join(', '))}` : ''}
                 </div>
                 <div class="handover-kb-content">${escapeHtml(entry.content || '')}</div>
@@ -6423,7 +6436,7 @@ function renderMergedActionQueue(vm) {
   // Summary bar
   setHtml('orderQueueSummary', vm ? `
     <div class="aq-summary-item">
-      <div class="aq-summary-label">${currentLang === 'ko' ? 'High Risk' : 'High Risk'}</div>
+      <div class="aq-summary-label">${currentLang === 'ko' ? '고위험' : 'High Risk'}</div>
       <div class="aq-summary-value" style="color:#c00">${vm.summary.high}</div>
       <div class="aq-summary-sub">${currentLang === 'ko' ? '즉시 확인 필요' : 'Immediate review'}</div>
     </div>
@@ -6851,17 +6864,17 @@ function buildShipmentChartViewModel(sourceRows = []) {
   const byCurrency = {};
   const byCustomer = {};
   const modeNames = {
-    1: currentLang === 'ko' ? 'Air' : 'Air',
-    2: currentLang === 'ko' ? 'Sea' : 'Sea',
-    3: currentLang === 'ko' ? 'Truck' : 'Truck',
-    4: currentLang === 'ko' ? 'Courier' : 'Courier',
+    1: currentLang === 'ko' ? '항공' : 'Air',
+    2: currentLang === 'ko' ? '해상' : 'Sea',
+    3: currentLang === 'ko' ? '육로' : 'Truck',
+    4: currentLang === 'ko' ? '특송' : 'Courier',
   };
 
   sourceRows.forEach(row => {
     const amountKRW = toKRW(Number(row.amountNum || 0), row.amountCurrency || row.currency || 'KRW');
-    const mode = modeNames[row.shipMode] || (currentLang === 'ko' ? 'Unknown' : 'Unknown');
+    const mode = modeNames[row.shipMode] || (currentLang === 'ko' ? '미상' : 'Unknown');
     const currency = row.currency || 'KRW';
-    const customer = row.customer || (currentLang === 'ko' ? 'Unknown' : 'Unknown');
+    const customer = row.customer || (currentLang === 'ko' ? '미상' : 'Unknown');
     byMode[mode] = { count: (byMode[mode]?.count || 0) + 1 };
     byCurrency[currency] = { krw: (byCurrency[currency]?.krw || 0) + amountKRW };
     byCustomer[customer] = { krw: (byCustomer[customer]?.krw || 0) + amountKRW };
@@ -7015,9 +7028,19 @@ function showDataBanner(source = null) {
       }))}</div>`
     : '';
   setDisplay('tabNav', 'flex');
-  setDisplay('uploadArea', 'none');
+  collapseUploadArea();
   setDisplay('uploadGuide', 'none');
   setDisplay('demoIntro', 'none');
+}
+
+function collapseUploadArea() {
+  // 데이터가 로드된 뒤에도 업로드 영역을 완전히 숨기지 않고 접힌 형태로 남겨
+  // "내 파일로 시도하기"가 계속 가능하도록 한다.
+  const uploadArea = byId('uploadArea');
+  if (uploadArea) {
+    uploadArea.style.display = '';
+    uploadArea.classList.add('collapsed');
+  }
 }
 
 function setUploadLoading(isLoading) {
@@ -7035,6 +7058,7 @@ async function processFile(file) {
     const workbook = XLSX.read(buffer, { type: 'array' });
     await App.loadWorkbook(workbook);
     initUI(file);
+    setDisplay('autoSampleBadge', 'none');
     return workbook;
   } catch (error) {
     showToast(t('message.fileProcessFail'), 'error');
@@ -7167,7 +7191,7 @@ function initUploadInteractions() {
 }
 
 function initUI(source = null) {
-  setDisplay('uploadArea', 'none');
+  collapseUploadArea();
   setDisplay('uploadGuide', 'none');
   setDisplay('demoIntro', 'none');
   setDisplay('tabNav', 'flex');
@@ -7190,12 +7214,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTranslations();
   initUploadInteractions();
   switchPanelTab('action');
+
+  // 첫 화면 이탈 방지: Load Sample Data 버튼과 동일한 loadSample()을 그대로 재사용해
+  // 외부 API(환율/로그인 사용자) 응답 속도와 무관하게 화면을 최우선으로 채운다.
+  // 실패 시 loadSample() 자체의 catch가 initUI를 호출하지 않으므로
+  // 기존 업로드 안내 화면(uploadArea/uploadGuide/demoIntro)으로 자연스럽게 폴백된다.
   try {
-    await fetchFxRates();
+    await loadSample();
+    setDisplay('autoSampleBadge', 'block');
   } catch {}
-  try {
-    await App.loadCurrentUser();
-  } catch {}
+
+  // 환율/로그인 사용자 정보는 화면을 막지 않고 백그라운드로 가져온다.
+  // toKRW()는 fxRates가 비어 있어도 고정 fallback(1380/1490/9.3 등)으로 안전하게
+  // 동작하므로 최초 렌더는 fallback 환율로 그려지고, 응답이 오면 금액 표시만 갱신한다.
+  fetchFxRates()
+    .then(() => {
+      if ((Store.get('orders') || []).length) render();
+    })
+    .catch(() => {});
+
+  App.loadCurrentUser().catch(() => {});
 });
 </script>
 </body>
